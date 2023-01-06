@@ -1,12 +1,12 @@
 const tools = require('../General/tools');
 
 function main() {
-    // tools.readFileSync('./input')
-    tools.readFileSync('./test_input')
+    tools.readFileSync('./input')
+    // tools.readFileSync('./test_input')
         .then((data) => {
             console.log('file readed !');
             let tInstructions = data.split('\r\n');
-            // step1(tInstructions, 20,40);
+            step1(tInstructions, 20,40);
             step2(tInstructions,40);
         })
         .catch((err) => {
@@ -85,8 +85,8 @@ function step2(tInstructions,step) {
 
     for(let i=0;i<240;i=i+step){
         let subs = stringPixel.substring(i, i + step - 1);
-        console.log(subs);
-        continue;
+        // console.log(subs);
+        // continue;
         //divide in 8 parts
         let partSize = step / 8;
         // console.log(partSize,step);
@@ -100,15 +100,16 @@ function step2(tInstructions,step) {
 }
 
 function drawPixel(stringPixel, cycleNr, xVal){
-    // if (xVal == cycleNr || (xVal - 1) == cycleNr || (xVal + 1) == cycleNr){
-    //     stringPixel += '█';
+    
+    // if (xVal == (cycleNr-1) || (xVal - 1) == (cycleNr-1) || (xVal + 1) == (cycleNr-1)) {
+    //     stringPixel += '#';
     // } else {
-    //     stringPixel += '░';
+    //     stringPixel += '.';
     // }
-    if (xVal == cycleNr || (xVal - 1) == cycleNr || (xVal + 1) == cycleNr) {
-        stringPixel += '#';
+    if (xVal == (cycleNr-1) || (xVal - 1) == (cycleNr-1) || (xVal + 1) == (cycleNr-1)) {
+        stringPixel += '█';
     } else {
-        stringPixel += '.';
+        stringPixel += '▒';
     }
     return stringPixel;
 }
