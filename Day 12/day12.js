@@ -1,23 +1,38 @@
 const tools = require('../General/tools');
 
 function main() {
-    // tools.readFileSync('./input')
-    tools.readFileSync('./test_input')
+    tools.readFileSync('./input')
+    // tools.readFileSync('./test_input')
         .then((data) => {
             console.log('file readed !');
             let oMaze = initMaze(data.split('\r\n'));
-            // console.log(oMaze);
-            oMaze.display();
+            console.log(oMaze.currentCells);
+            //oMaze.display();
             console.time('step1');
             step1(oMaze);
             console.timeEnd('step1');
-            oMaze.display();
+            // oMaze.display();
             console.log('Ending Value:',oMaze.paths[oMaze.endingCell.split(';')[0]][oMaze.endingCell.split(';')[1]]);
-            
-            
+            console.log('test for all starting points');
+            let minPath = -1;
             console.time('step2');
-            
+            let tMaze = initMaze(data.split('\r\n')).clone();
+            console.log('Nombre de point de départ:', tMaze.length);
+            let cnt = 0;
+            for (oMaze of tMaze){
+                // console.log(oMaze.currentCells);
+                step1(oMaze);
+                let endingValue = oMaze.paths[oMaze.endingCell.split(';')[0]][oMaze.endingCell.split(';')[1]];
+                // console.log('Ending Value:', endingValue);
+                if (endingValue !== -1 && (minPath == -1 || minPath > endingValue)){
+                    minPath = endingValue;
+                }
+                // if (cnt++ >= 2){
+                //     break;
+                // }
+            }
             console.timeEnd('step2');
+            console.log('Le plus petit chemin trouvé est donc',minPath);
         })
         .catch((err) => {
             console.error(err);
@@ -93,8 +108,8 @@ class Maze{
 
     nextStep(){
         if(this.currentCells.length == 0){
-            console.error('?');
-            return;
+            // console.error('?');
+            return false;
         }
         let nextCells = [];
         for(let currentCell of this.currentCells){
@@ -120,11 +135,12 @@ class Maze{
                 }
                 } catch (error) {
                     console.log('Error',adjCell);
-                    return;
+                    return false;
                 }
             }
         }
         this.currentCells = nextCells;
+        return true;
     }
 
     getAdjacentCells(row,col){
@@ -164,6 +180,28 @@ class Maze{
 
         return adjCells;
     }
+
+    //for all possibly starting point, clone maze
+    clone(){
+        let tMaze = [];
+        for(let i=0;i<this.height;i++){
+            // console.log(this.cells[i]);
+            let tStartingPoints = this.cells[i].reduce(
+                (accumulator,currentValue,currentIndex) => {
+                    if (currentValue == 'a'){
+                        accumulator.push(currentIndex);
+                    }
+                    return accumulator;
+                }, []
+            );
+            for (let startingPoint of tStartingPoints){
+                let startCell = i + ';' + startingPoint;
+                // console.log('Point de départ possible:',startCell);
+                tMaze.push(new Maze(this.length, this.height, this.cells, startCell, this.endingCell));
+            }
+        }
+        return tMaze;
+    }
 }
 
 function step1(oMaze){
@@ -171,7 +209,9 @@ function step1(oMaze){
     let max = oMaze.length * oMaze.height;
     let i = 0;
     do {
-        oMaze.nextStep();
+        if(!oMaze.nextStep()){
+            break;
+        }
         if(i++ >= max){
             console.log('Max reached');
             break;
